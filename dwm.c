@@ -234,6 +234,7 @@ static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
 
 static void focusmaster(const Arg *arg);
+static void focusprev(const Arg *arg);
 
 /* variables */
 static const char broken[] = "broken";
@@ -268,6 +269,7 @@ static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
+static Client* prevclient = NULL;
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
@@ -1768,6 +1770,7 @@ unfocus(Client *c, int setfocus)
 {
 	if (!c)
 		return;
+	prevclient = c;
 	grabbuttons(c, 0);
 	XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
 	if (setfocus) {
@@ -2136,7 +2139,8 @@ zoom(const Arg *arg)
 
 	if (!selmon->lt[selmon->sellt]->arrange || !c || c->isfloating)
 		return;
-	if (c == nexttiled(selmon->clients) && !(c = nexttiled(c->next)))
+	if (c == nexttiled(selmon->clients) && !(c = prevclient =
+	    nexttiled(c->next)))
 		return;
 	pop(c);
 }
@@ -2179,4 +2183,11 @@ focusmaster(const Arg *arg)
 
 	if (c)
 		focus(c);
+}
+
+void
+focusprev(const Arg *arg)
+{
+	if (prevclient != NULL)
+		focus(prevclient);
 }
