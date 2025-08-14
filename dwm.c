@@ -96,6 +96,7 @@ struct Client {
 	Client *snext;
 	Monitor *mon;
 	Window win;
+	Window borderwin;
 };
 
 typedef struct {
@@ -269,6 +270,7 @@ static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
+
 static Client* prevclient = NULL;
 
 /* configuration, allows nested code to access above variables */
@@ -790,6 +792,33 @@ expose(XEvent *e)
 }
 
 void
+drawborderwin(Client* c, int sel)
+{
+	Client* t;
+	int n, ismaster, w, h, x, y;
+	unsigned int col;
+	
+	if (c->isfloating)
+		return;
+	
+	for (n = 0, t = nexttiled(selmon->clients); t != NULL && t != c;
+	    t = nexttiled(t->next), n++);
+	ismaster = n < selmon->nmaster;
+	w = ismaster ? borderpx : c->w;
+	h = ismaster ? c->h : borderpx;
+	x = ismaster ? c->x - borderpx : c->x;
+	y = ismaster ? c->y: c->y - borderpx;
+	col = sel ? scheme[SchemeSel][ColBorder].pixel :
+	    scheme[SchemeNorm][ColBorder].pixel;
+	
+	if (c->borderwin != 0)
+		XUnmapWindow(dpy, c->borderwin);
+	c->borderwin = XCreateSimpleWindow(dpy, XDefaultRootWindow(dpy), x, y,
+	    w, h, 0, 0, col);
+	XMapWindow(dpy, c->borderwin);
+}
+
+void
 focus(Client *c)
 {
 	if (!c || !ISVISIBLE(c))
@@ -804,7 +833,8 @@ focus(Client *c)
 		detachstack(c);
 		attachstack(c);
 		grabbuttons(c, 1);
-		XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
+		drawborderwin(c, 1);
+		
 		setfocus(c);
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
@@ -1062,11 +1092,11 @@ manage(Window w, XWindowAttributes *wa)
 		c->y = c->mon->wy + c->mon->wh - HEIGHT(c);
 	c->x = MAX(c->x, c->mon->wx);
 	c->y = MAX(c->y, c->mon->wy);
-	c->bw = borderpx;
+	c->bw = 0;
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
-	XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
+	drawborderwin(c, selmon->sel == c);
 	configure(c); /* propagates border_width, if size doesn't change */
 	updatewindowtype(c);
 	updatesizehints(c);
@@ -1118,7 +1148,7 @@ monocle(Monitor *m)
 {
 	unsigned int n = 0;
 	Client *c;
-
+	
 	for (c = m->clients; c; c = c->next)
 		if (ISVISIBLE(c))
 			n++;
@@ -1295,6 +1325,7 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	c->oldw = c->w; c->w = wc.width = w;
 	c->oldh = c->h; c->h = wc.height = h;
 	wc.border_width = c->bw;
+	drawborderwin(c, selmon->sel == c);
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
 	XSync(dpy, False);
@@ -1704,12 +1735,12 @@ tile(Monitor *m)
 	for (i = my = ty = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
 		if (i < m->nmaster) {
 			h = (m->wh - my) / (MIN(n, m->nmaster) - i);
-			resize(c, m->wx, m->wy + my, mw - (2*c->bw), h - (2*c->bw), 0);
+			resize(c, m->wx + borderpx, m->wy + my, mw - borderpx, h, 0);
 			if (my + HEIGHT(c) < m->wh)
 				my += HEIGHT(c);
 		} else {
 			h = (m->wh - ty) / (n - i);
-			resize(c, m->wx + mw, m->wy + ty, m->ww - mw - (2*c->bw), h - (2*c->bw), 0);
+			resize(c, m->wx + mw, m->wy + ty + borderpx, m->ww - mw, h - borderpx, 0);
 			if (ty + HEIGHT(c) < m->wh)
 				ty += HEIGHT(c);
 		}
@@ -1771,12 +1802,13 @@ unfocus(Client *c, int setfocus)
 	if (!c)
 		return;
 	prevclient = c;
+	
 	grabbuttons(c, 0);
-	XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
+	drawborderwin(c, 0);
 }
 
 void
@@ -1788,6 +1820,7 @@ unmanage(Client *c, int destroyed)
 	detach(c);
 	detachstack(c);
 	if (!destroyed) {
+		XUnmapWindow(dpy, c->borderwin);
 		wc.border_width = c->oldbw;
 		XGrabServer(dpy); /* avoid race conditions */
 		XSetErrorHandler(xerrordummy);
