@@ -26,8 +26,8 @@ static const Rule rules[] = {
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 */
-	/* class	inst	title	tags	mask	float	monitor */
-	/*{ NULL,		NULL,	NULL,	1 << 1,	0,	0,	-1	},*/
+	/* class	inst	title	tags	float	monitor */
+	{ NULL,		NULL,	NULL,	0,	0,	-1	},
 };
 
 /* layout(s) */
