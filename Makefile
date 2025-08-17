@@ -5,6 +5,7 @@ include config.mk
 
 SRC = drw.c dwm.c util.c
 OBJ = ${SRC:.c=.o}
+STRIPPER = llvm-strip
 
 all: dwm
 
@@ -31,6 +32,7 @@ dist: clean
 	rm -rf dwm-${VERSION}
 
 install: all
+	${STRIPPER} dwm
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	cp -f dwm ${DESTDIR}${PREFIX}/bin
 	chmod 755 ${DESTDIR}${PREFIX}/bin/dwm
