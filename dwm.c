@@ -774,29 +774,76 @@ expose(XEvent *e)
 }
 
 void
+hideborderwin(Client* c)
+{
+	XMoveResizeWindow(dpy, c->borderwin, -1, -1, 1, 1);
+}
+
+void
 drawborderwin(Client* c, int sel)
 {
 	Client* t;
 	int n, ismaster, w, h, x, y;
+	int ismonocle;
 	unsigned int col;
+	XWindowChanges wc;
+	XSetWindowAttributes wa;
 	
-	if (c->isfloating)
-		return;
-	
-	for (n = 0, t = nexttiled(selmon->clients); t != NULL && t != c;
-	    t = nexttiled(t->next), n++);
-	ismaster = n < selmon->nmaster;
-	w = ismaster ? borderpx : c->w;
-	h = ismaster ? c->h : borderpx;
-	x = ismaster ? c->x - borderpx : c->x;
-	y = ismaster ? c->y: c->y - borderpx;
-	col = sel ? scheme[SchemeSel][ColBorder].pixel :
+	ismonocle = strcmp(selmon->ltsymbol, MONOCLE_SYMBOL) == 0;
+	col = (sel || ismonocle) ? scheme[SchemeSel][ColBorder].pixel :
 	    scheme[SchemeNorm][ColBorder].pixel;
 	
-	if (c->borderwin != 0)
-		XUnmapWindow(dpy, c->borderwin);
-	c->borderwin = XCreateSimpleWindow(dpy, XDefaultRootWindow(dpy), x, y,
-	    w, h, 0, 0, col);
+	if ((c->isfullscreen || c->isfloating) && c->borderwin != 0)
+		hideborderwin(c);
+	
+	if (c->isfullscreen)
+		return;
+	
+	if (c->isfloating) {
+		XSetWindowBorderWidth(dpy, c->win, flbordpx);
+		XSetWindowBorder(dpy, c->win, col);
+		return;
+	}
+	
+	if (ismonocle) {
+		w = selmon->ww;
+		h = borderpx;
+		x = selmon->wx;
+		y = selmon->wy + selmon->wh - borderpx;
+	}
+	else {
+		for (n = 0, t = nexttiled(selmon->clients); t != NULL && t != c;
+		    t = nexttiled(t->next), n++);
+		ismaster = n < selmon->nmaster;
+		w = ismaster ? borderpx : c->w;
+		h = ismaster ? c->h : borderpx;
+		x = ismaster ? c->x - borderpx : c->x;
+		y = ismaster ? c->y: c->y - borderpx;
+	}
+	
+	XSetWindowBorderWidth(dpy, c->win, 0);
+	XSetWindowBorder(dpy, c->win, 0);
+	memset(&wc, 0, sizeof(wc));
+	memset(&wa, 0, sizeof(wa));
+	wc.stack_mode = BottomIf;
+	wa.background_pixel = col;
+	
+	if (c->borderwin != 0) {
+		wc.x = x;
+		wc.y = y;
+		wc.width = w;
+		wc.height = h;
+		XSetWindowBackground(dpy, c->borderwin, col);
+		XConfigureWindow(dpy, c->borderwin, CWX | CWY | CWWidth |
+		    CWHeight | CWStackMode, &wc);
+		XClearWindow(dpy, c->borderwin);
+		return;
+	}
+	
+	c->borderwin = XCreateWindow(dpy, root, x, y, w, h, 0,
+	    DefaultDepth(dpy, screen), CopyFromParent,
+	    DefaultVisual(dpy, screen), CWBackPixel, &wa);
+	XConfigureWindow(dpy, c->borderwin, CWStackMode, &wc);
 	XMapWindow(dpy, c->borderwin);
 }
 
@@ -1064,7 +1111,6 @@ manage(Window w, XWindowAttributes *wa)
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
-	drawborderwin(c, selmon->sel == c);
 	configure(c); /* propagates border_width, if size doesn't change */
 	updatewindowtype(c);
 	updatesizehints(c);
@@ -1086,6 +1132,7 @@ manage(Window w, XWindowAttributes *wa)
 	c->mon->sel = c;
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
+	drawborderwin(c, selmon->sel == c);
 	focus(NULL);
 }
 
@@ -1114,16 +1161,10 @@ maprequest(XEvent *e)
 void
 monocle(Monitor *m)
 {
-	unsigned int n = 0;
 	Client *c;
 	
-	for (c = m->clients; c; c = c->next)
-		if (ISVISIBLE(c))
-			n++;
-	if (n > 0) /* override layout symbol */
-		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
 	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
-		resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
+		resize(c, m->wx, m->wy, m->ww, m->wh - borderpx, 0);
 }
 
 void
@@ -1293,9 +1334,9 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	c->oldw = c->w; c->w = wc.width = w;
 	c->oldh = c->h; c->h = wc.height = h;
 	wc.border_width = c->bw;
-	drawborderwin(c, selmon->sel == c);
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
+	drawborderwin(c, selmon->sel == c);
 	XSync(dpy, False);
 }
 
@@ -1636,6 +1677,7 @@ showhide(Client *c)
 	if (ISVISIBLE(c)) {
 		/* show clients top down */
 		XMoveWindow(dpy, c->win, c->x, c->y);
+		drawborderwin(c, selmon->sel == c);
 		if ((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating) && !c->isfullscreen)
 			resize(c, c->x, c->y, c->w, c->h, 0);
 		showhide(c->snext);
@@ -1643,6 +1685,8 @@ showhide(Client *c)
 		/* hide clients bottom up */
 		showhide(c->snext);
 		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+		if (c->borderwin != 0)
+			hideborderwin(c);
 	}
 }
 

@@ -1,10 +1,11 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const unsigned int borderpx  = 3;        /* border pixel of windows */
-static const unsigned int snap      = 32;       /* snap pixel */
-static const int showbar            = 0;        /* 0 means no bar */
-static const int topbar             = 1;        /* 0 means bottom bar */
+static const unsigned int borderpx	= 3;	/* border pixel of windows */
+static const unsigned int flbordpx	= 2;	/* border pixel for floating */
+static const unsigned int snap 		= 32;	/* snap pixel */
+static const int showbar		= 0;	/* 0 means no bar */
+static const int topbar			= 1;	/* 0 means bottom bar */
 static const char *fonts[]          = { "terminus:size=12" };
 static const char dmenufont[]       = "terminus:size=12";
 static const char col_gray1[]       = "#222222";
@@ -36,11 +37,15 @@ static const int nmaster     = 1;    /* number of clients in master area */
 static const int resizehints = 0;    /* 1 means respect size hints in tiled resizals */
 static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
 
+#define TILED_SYMBOL "T"
+#define FLOATING_SYMBOL "F"
+#define MONOCLE_SYMBOL "M"
+
 static const Layout layouts[] = {
-	/* symbol     arrange function */
-	{ "[]=",      tile },    /* first entry is default */
-	{ "><>",      NULL },    /* no layout function means floating behavior */
-	{ "[M]",      monocle },
+	/* symbol		arrange function */
+	{ TILED_SYMBOL,		tile },	/* first entry is default */
+	{ FLOATING_SYMBOL,	NULL },	/* floating */
+	{ MONOCLE_SYMBOL,	monocle },
 };
 
 /* key definitions */
