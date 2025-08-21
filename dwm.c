@@ -56,9 +56,11 @@
 #define TAGMASK                 ((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 
+#define REALSELSCHEME(C)        (c->tags == 1 ? (SchemeSel) : (SchemeSelAlt))
+
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel }; /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeSelAlt }; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
        NetWMWindowTypeDialog, NetClientList, NetLast }; /* EWMH atoms */
@@ -752,7 +754,7 @@ drawborderwin(Client* c, int sel)
 	XSetWindowAttributes wa;
 	
 	ismonocle = strcmp(selmon->ltsymbol, MONOCLE_SYMBOL) == 0;
-	col = (sel || ismonocle) ? scheme[SchemeSel][ColBorder].pixel :
+	col = (sel || ismonocle) ? scheme[REALSELSCHEME(c)][ColBorder].pixel :
 	    scheme[SchemeNorm][ColBorder].pixel;
 	
 	if ((c->isfullscreen || c->isfloating) && c->borderwin != 0)
