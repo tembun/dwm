@@ -232,7 +232,6 @@ static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
 
 static void focusmaster(const Arg *arg);
-static void focusprev(const Arg *arg);
 
 /* variables */
 static const char broken[] = "broken";
@@ -2181,11 +2180,4 @@ focusmaster(const Arg *arg)
 
 	if (c)
 		focus(c);
-}
-
-void
-focusprev(const Arg *arg)
-{
-	if (prevclient != NULL)
-		focus(prevclient);
 }
