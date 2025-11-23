@@ -12,8 +12,9 @@ static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
 static const char col_gray4[]       = "#222222";
-static const char col_cyan[]        = "#ffc25f";
-static const char col_cyan_alt[]    = "#5eff85";
+static const char col_gray5[]       = "#dedede";
+static const char col_cyan[]        = "#269c43";
+static const char col_cyan_alt[]    = "#ff0b8d";
 static const char *colors[][3]      = {
 	/*		    fg		bg		border   */
 	[SchemeNorm]	= { col_gray3,	col_gray1,	col_gray2	},
@@ -63,7 +64,7 @@ static const Layout layouts[] = {
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
+static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray5, NULL };
 static const char *termcmd[]  = { "st", NULL };
 
 #include "movestack.c"
