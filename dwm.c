@@ -234,6 +234,7 @@ static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
 
 static void focusmaster(const Arg *arg);
+static int visibleclientsnum(void);
 
 /* variables */
 static const char broken[] = "broken";
@@ -992,7 +993,7 @@ grabkeys(void)
 void
 incnmaster(const Arg *arg)
 {
-	selmon->nmaster = MAX(selmon->nmaster + arg->i, 0);
+	selmon->nmaster = MIN(visibleclientsnum(), MAX(selmon->nmaster + arg->i, 0));
 	arrange(selmon);
 }
 
@@ -2056,11 +2057,16 @@ updatewmhints(Client *c)
 void
 view(const Arg *arg)
 {
+	int visclnum;
+	
 	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 		return;
 	selmon->seltags ^= 1; /* toggle sel tagset */
 	if (arg->ui & TAGMASK)
 		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
+	visclnum = visibleclientsnum();
+	if (visclnum != 0)
+		selmon->nmaster = MIN(visibleclientsnum(), selmon->nmaster);
 	focus(NULL);
 	arrange(selmon);
 }
@@ -2182,4 +2188,17 @@ focusmaster(const Arg *arg)
 
 	if (c)
 		focus(c);
+}
+
+int
+visibleclientsnum(void)
+{
+	int num = 0;
+	Client* c;
+	
+	for (c = selmon->clients; c; c = c->next) {
+		if (ISVISIBLE(c))
+			num++;
+	}
+	return (num);
 }
