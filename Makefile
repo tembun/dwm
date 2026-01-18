@@ -5,7 +5,6 @@ include config.mk
 
 SRC = drw.c dwm.c util.c
 OBJ = ${SRC:.c=.o}
-STRIPPER = llvm-strip
 
 all: dwm
 
@@ -32,10 +31,9 @@ dist: clean
 	rm -rf dwm-${VERSION}
 
 install: all
-	${STRIPPER} dwm
-	mkdir -p ${DESTDIR}${PREFIX}/bin
-	cp -f dwm ${DESTDIR}${PREFIX}/bin
-	chmod 755 ${DESTDIR}${PREFIX}/bin/dwm
+	mkdir -p ${DESTDIR}${PREFIX}/${BINDIR}
+	${INSTALL} ${INSTALL_STRIP} ${INSTALL_MODE_OPT} ${BIN_MODE} dwm\
+	    ${DESTDIR}${PREFIX}/${BINDIR}
 	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	sed "s/VERSION/${VERSION}/g" < dwm.1 > ${DESTDIR}${MANPREFIX}/man1/dwm.1
 	chmod 644 ${DESTDIR}${MANPREFIX}/man1/dwm.1

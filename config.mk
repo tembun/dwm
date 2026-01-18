@@ -5,7 +5,13 @@ VERSION = 6.5
 
 # paths
 PREFIX = /usr/local
+BINDIR=	bin
 MANPREFIX = ${PREFIX}/share/man
+
+BIN_MODE= 0755
+INSTALL=		install
+INSTALL_STRIP=		-s
+INSTALL_MODE_OPT=	-m
 
 X11INC = /usr/local/include
 X11LIB = /usr/local/lib
