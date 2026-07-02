@@ -753,23 +753,23 @@ drawborderwin(Client* c, int sel)
 	unsigned int col;
 	XWindowChanges wc;
 	XSetWindowAttributes wa;
-	
+
 	ismonocle = strcmp(selmon->ltsymbol, MONOCLE_SYMBOL) == 0;
 	col = (sel || ismonocle) ? scheme[REALSELSCHEME(c)][ColBorder].pixel :
 	    scheme[SchemeNorm][ColBorder].pixel;
-	
+
 	if ((c->isfullscreen || c->isfloating) && c->borderwin != 0)
 		hideborderwin(c);
-	
+
 	if (c->isfullscreen)
 		return;
-	
+
 	if (c->isfloating) {
 		XSetWindowBorderWidth(dpy, c->win, flbordpx);
 		XSetWindowBorder(dpy, c->win, col);
 		return;
 	}
-	
+
 	if (ismonocle) {
 		w = selmon->ww;
 		h = borderpx;
@@ -785,14 +785,14 @@ drawborderwin(Client* c, int sel)
 		x = ismaster ? c->x - borderpx : c->x;
 		y = ismaster ? c->y: c->y - borderpx;
 	}
-	
+
 	XSetWindowBorderWidth(dpy, c->win, 0);
 	XSetWindowBorder(dpy, c->win, 0);
 	memset(&wc, 0, sizeof(wc));
 	memset(&wa, 0, sizeof(wa));
 	wc.stack_mode = BottomIf;
 	wa.background_pixel = col;
-	
+
 	if (c->borderwin != 0) {
 		wc.x = x;
 		wc.y = y;
@@ -804,7 +804,7 @@ drawborderwin(Client* c, int sel)
 		XClearWindow(dpy, c->borderwin);
 		return;
 	}
-	
+
 	c->borderwin = XCreateWindow(dpy, root, x, y, w, h, 0,
 	    DefaultDepth(dpy, screen), CopyFromParent,
 	    DefaultVisual(dpy, screen), CWBackPixel, &wa);
@@ -1127,7 +1127,7 @@ void
 monocle(Monitor *m)
 {
 	Client *c;
-	
+
 	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
 		resize(c, m->wx, m->wy, m->ww, m->wh - borderpx, 0);
 }
@@ -1771,7 +1771,7 @@ unfocus(Client *c, int setfocus)
 	if (!c)
 		return;
 	prevclient = c;
-	
+
 	grabbuttons(c, 0);
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
@@ -2058,7 +2058,7 @@ void
 view(const Arg *arg)
 {
 	int visclnum;
-	
+
 	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 		return;
 	selmon->seltags ^= 1; /* toggle sel tagset */
@@ -2195,7 +2195,7 @@ visibleclientsnum(void)
 {
 	int num = 0;
 	Client* c;
-	
+
 	for (c = selmon->clients; c; c = c->next) {
 		if (ISVISIBLE(c))
 			num++;
