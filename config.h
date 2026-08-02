@@ -72,11 +72,11 @@ static const Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_d,      spawn,          {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
-	{ MODKEY,                       XK_b,      togglebar,      {0} },
-	{ MODKEY,                       XK_h,      focusstack,     {.i = -1 } },
-	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
-	{ MODKEY,                       XK_l,      focusstack,     {.i = +1 } },
-	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
+	{ MODKEY,                       XK_minus,      togglebar,      {0} },
+	{ MODKEY,                       XK_b,      focusstack,     {.i = -1 } },
+	{ MODKEY,                       XK_n,      focusstack,     {.i = +1 } },
+	{ MODKEY,                       XK_f,      focusstack,     {.i = +1 } },
+	{ MODKEY,                       XK_p,      focusstack,     {.i = -1 } },
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
 	{ MODKEY,                       XK_o,      incnmaster,     {.i = -1 } },
 	{ MODKEY,                       XK_Left,   setmfact,       {.f = -0.01} },
@@ -95,10 +95,10 @@ static const Key keys[] = {
 	/*{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },*/
 	/*{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },*/
 	/*{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },*/
-	{ MODKEY|ShiftMask,             XK_h,      movestack,      {.i = -1 } },
-	{ MODKEY|ShiftMask,             XK_l,      movestack,      {.i = +1 } },
-	{ MODKEY|ShiftMask,             XK_j,      movestack,      {.i = +1 } },
-	{ MODKEY|ShiftMask,             XK_k,      movestack,      {.i = -1 } },
+	{ MODKEY|ShiftMask,             XK_b,      movestack,      {.i = -1 } },
+	{ MODKEY|ShiftMask,             XK_f,      movestack,      {.i = +1 } },
+	{ MODKEY|ShiftMask,             XK_n,      movestack,      {.i = +1 } },
+	{ MODKEY|ShiftMask,             XK_p,      movestack,      {.i = -1 } },
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)
