@@ -65,13 +65,15 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray5, NULL };
-static const char *termcmd[]  = { "scratchmux", NULL };
+static const char *scratchtermcmd[]  = { "scratchmux", NULL };
+static const char *simpletermcmd[]  = { "xterm", NULL };
 
 #include "movestack.c"
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_d,      spawn,          {.v = dmenucmd } },
-	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
+	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = scratchtermcmd } },
+	{ MODKEY|ShiftMask,             XK_backslash, spawn,          {.v = simpletermcmd } },
 	{ MODKEY,                       XK_minus,      togglebar,      {0} },
 	{ MODKEY,                       XK_b,      focusstack,     {.i = -1 } },
 	{ MODKEY,                       XK_n,      focusstack,     {.i = +1 } },
@@ -118,7 +120,6 @@ static const Button buttons[] = {
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
-	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
